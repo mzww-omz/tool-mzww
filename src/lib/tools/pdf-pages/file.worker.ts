@@ -1,0 +1,1 @@
+import {inspectPDF,buildPDF} from './logic';self.onmessage=async(e)=>{try{const bytes=await Promise.all(e.data.files.map(async(f:File)=>new Uint8Array(await f.arrayBuffer())));const result=e.data.pages?await buildPDF(bytes,e.data.pages):await inspectPDF(bytes[0]);self.postMessage({result});}catch(error){self.postMessage({error:(error as Error).message});}};
