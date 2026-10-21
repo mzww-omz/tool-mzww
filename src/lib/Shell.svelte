@@ -18,11 +18,11 @@
  $effect(()=>{if(hydrated){try{localStorage.setItem('toolbox:favorites',JSON.stringify(favorites));localStorage.setItem('toolbox:recent',JSON.stringify(recent));}catch{storageNotice='ローカル保存を利用できません。設定はこの画面でのみ保持されます。';}}});
  $effect(()=>{id;mobileOpen=false;});
  function favorite(id:string){favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];}
- function keyboard(event:KeyboardEvent){if((event.metaKey||event.ctrlKey)&&event.key==='k'){event.preventDefault();mobileOpen=true;requestAnimationFrame(()=>search?.focus());}if(event.key==='Escape')mobileOpen=false;}
+ function keyboard(event:KeyboardEvent){if(event.defaultPrevented)return;if((event.metaKey||event.ctrlKey)&&event.key==='k'){event.preventDefault();mobileOpen=true;requestAnimationFrame(()=>search?.focus());}if(event.key==='Escape')mobileOpen=false;}
  function showHelp(){help.showModal();}
 </script>
 
-<svelte:head><title>{active?`${active.name} — TOOLBOX`:'ツールが見つかりません — TOOLBOX'}</title><meta name="description" content="テキスト、開発、画像、数学。日々の作業に使える15の道具を、ひとつの場所に。登録不要・ブラウザ内で完結。"/></svelte:head>
+<svelte:head><title>{active?`${active.name} — TOOLBOX`:'ツールが見つかりません — TOOLBOX'}</title><meta name="description" content="テキスト、開発、画像、数学。日々の作業に使える道具を、ひとつの場所に。登録不要・ブラウザ内で完結。"/></svelte:head>
 <svelte:window onkeydown={keyboard}/>
 <a href="#main-content" class="skip-link">ツール本体へスキップ</a>
 <header class="site-header">
@@ -51,11 +51,11 @@
   <div class="title-block"><div><p class="tool-eyebrow">TOOL {active.number} <span>/ {active.english.toUpperCase()}</span></p><h1>{active.name}</h1><p class="tool-description">{active.description}</p></div><div class="tool-index" aria-hidden="true">{active.number}<span>UTILITY</span></div></div>
   <hr class="title-rule"/>
   <div class="tool-body">{#key active.id}{#await active.load()}<p class="loading" role="status">ツールを読み込み中…</p>{:then module}<module.default bind:state={states[active.id]}/>{:catch}<p class="error" role="alert">ツールを読み込めませんでした。接続を確認して再読み込みしてください。</p>{/await}{/key}</div>
-  <div class="privacy-note"><span class="privacy-symbol" aria-hidden="true">↳</span><div><strong>データは、あなたのブラウザに。</strong><p>入力したテキストやファイルをサーバーに送信しません。<br/>ツールを切り替えても入力は保持されます。ページを再読み込みすると消去されます。</p></div><span class="micro">100%<br/>CLIENT-SIDE</span></div>
+  <div class="privacy-note"><span class="privacy-symbol" aria-hidden="true">↳</span><div><strong>データは、あなたのブラウザに。</strong><p>入力したテキストやファイルをサーバーに送信しません。<br/>{active.persistent?'このツールのメモ・予定は端末内のIndexedDBに保存されます。ブラウザのデータ削除で失われます。':active.id==='keyboard'?'キー入力は保存せず、この画面を離れると消去します。':'通常の入力はツールを切り替えても保持され、再読み込みで消去されます。'}</p></div><span class="micro">100%<br/>CLIENT-SIDE</span></div>
   {#if related.length}<section class="related-tools"><div class="section-heading"><h2>こちらの道具も</h2><span class="micro">RELATED TOOLS</span></div><div class="related-list">{#each related as tool}<a href={`/tools/${tool.id}`}><span class="micro">{tool.number}</span><span>{tool.name}</span><span aria-hidden="true">↗</span></a>{/each}</div></section>{/if}
   {:else}<div class="not-found"><p class="micro">404 / TOOL NOT FOUND</p><h1>ツールが見つかりません</h1><p>左の一覧からツールを選択してください。</p><a class="button" href="/">ホームに戻る ↗</a></div>{/if}
   {#if storageNotice}<p role="status" class="error">{storageNotice}</p>{/if}
   <footer class="content-footer"><span>必要なときに、必要な道具を。</span><span>BUILT FOR THE LITTLE THINGS. <span class="accent">↗</span></span></footer>
  </main>
 </div>
-<dialog bind:this={help} aria-labelledby="help-title"><div class="field-heading"><span class="micro">QUICK GUIDE</span><button onclick={()=>help.close()} aria-label="閉じる">閉じる ×</button></div><h2 id="help-title">TOOLBOXの使い方</h2><p>左の一覧から道具を選択してください。日本語・英語・別名で検索できます。</p><dl><dt><kbd>⌘ / Ctrl + K</kbd></dt><dd>ツール検索へ移動</dd><dt><kbd>Tab / Shift + Tab</kbd></dt><dd>操作項目を移動</dd><dt><kbd>Escape</kbd></dt><dd>ダイアログ・モバイル一覧を閉じる</dd></dl><p>お気に入りと最近の20件は、このブラウザに保存されます。入力内容はページの再読み込みまでメモリ内だけで保持されます。</p><p class="tool-note">クリップボード・暗号機能には HTTPS または localhost が必要です。</p></dialog>
+<dialog bind:this={help} aria-labelledby="help-title"><div class="field-heading"><span class="micro">QUICK GUIDE</span><button onclick={()=>help.close()} aria-label="閉じる">閉じる ×</button></div><h2 id="help-title">TOOLBOXの使い方</h2><p>左の一覧から道具を選択してください。日本語・英語・別名で検索できます。</p><dl><dt><kbd>⌘ / Ctrl + K</kbd></dt><dd>ツール検索へ移動</dd><dt><kbd>Tab / Shift + Tab</kbd></dt><dd>操作項目を移動</dd><dt><kbd>Escape</kbd></dt><dd>ダイアログ・モバイル一覧を閉じる</dd></dl><p>お気に入りと最近の20件は、このブラウザに保存されます。通常の入力は再読み込みまでメモリ内だけで保持されます。メモ・カレンダーの予定は端末内に保存されます。キー入力と座標履歴は保存しません。</p><p class="tool-note">クリップボード・暗号機能には HTTPS または localhost が必要です。</p></dialog>
