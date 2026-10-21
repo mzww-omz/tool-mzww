@@ -4,7 +4,7 @@
  import { dimensions } from './logic';
  let {state: data=$bindable()}=$props<{state:ToolState}>();
  untrack(()=>{data.source??='';data.output??='';data.file??=null;data.width??=800;data.height??=600;data.lock??=true;data.format??='image/png';data.quality??=90;data.error??='';data.size??=0;});
- let busy=$state(false);
+ let busy=$derived(data.busy ?? false);
  let input:HTMLInputElement;
  function clear(){
   if(data.source)URL.revokeObjectURL(data.source);
@@ -15,7 +15,7 @@
  async function load(event:Event){
   const file=(event.currentTarget as HTMLInputElement).files?.[0];
   if(!file)return;
-  clear();busy=true;
+  clear();data.busy=true;
   try{
    if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('PNG、JPEG、WebP画像を選択してください。');
    if(file.size>10*1024*1024)throw new Error('入力ファイルは10MB以下にしてください。');
@@ -26,13 +26,13 @@
     data.width=Math.min(bitmap.width,2000);data.height=Math.round(bitmap.height*data.width/bitmap.width);
     data.source=URL.createObjectURL(file);data.file=file;
    }finally{bitmap.close();}
-  }catch(e){data.error=(e as Error).message;}finally{busy=false;}
+  }catch(e){data.error=(e as Error).message;}finally{data.busy=false;}
  }
  function widthChanged(){if(data.lock && data.originalWidth)data.height=Math.max(1,Math.round(data.originalHeight*Number(data.width)/data.originalWidth));}
  function heightChanged(){if(data.lock && data.originalHeight)data.width=Math.max(1,Math.round(data.originalWidth*Number(data.height)/data.originalHeight));}
  async function process(){
   if(!data.file)return;
-  busy=true;data.error='';
+  data.busy=true;data.error='';
   if(data.output)URL.revokeObjectURL(data.output);
   data.output='';
   try{
@@ -50,7 +50,7 @@
    if(!blob || blob.type!==data.format)throw new Error('このブラウザは指定形式での保存に対応していません。');
    data.output=URL.createObjectURL(blob);data.size=blob.size;
    data.extension=data.format==='image/jpeg'?'jpg':data.format.split('/')[1];
-  }catch(e){data.error=(e as Error).message;}finally{busy=false;}
+  }catch(e){data.error=(e as Error).message;}finally{data.busy=false;}
  }
 </script>
 <div class="upload-zone"><span class="micro">LOCAL FILE / NO UPLOAD</span><strong>画像を選択して、軽く、小さく。</strong><label class="file-label">ファイルを選択<input bind:this={input} type="file" accept="image/png,image/jpeg,image/webp" onchange={load} disabled={busy}/></label><span>PNG・JPEG・WebP / 最大10MB・4,000万画素</span></div>
