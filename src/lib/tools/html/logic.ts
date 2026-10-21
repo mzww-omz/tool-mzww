@@ -1,3 +1,4 @@
+// shortcut: common named entities only; add the HTML5 table when full named-reference coverage is needed.
 const entities:Record<string,string>={amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:'\u00a0',copy:'©',reg:'®',trade:'™',yen:'¥',euro:'€',mdash:'—',ndash:'–',hellip:'…'};
 export function html(text:string,decode:boolean){
  if(text.length>100000)throw new Error('100,000文字以内にしてください。');

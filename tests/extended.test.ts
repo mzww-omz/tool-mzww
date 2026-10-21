@@ -5,7 +5,7 @@ import {bmi} from '../src/lib/tools/bmi/logic.ts';
 import {deviation,statistics} from '../src/lib/tools/zscore/logic.ts';
 import {qrMatrix,qrSvg} from '../src/lib/tools/qr/logic.ts';
 import {importNotes,searchNotes} from '../src/lib/tools/notes/logic.ts';
-import {distance,speed,acceptFix} from '../src/lib/tools/gps/logic.ts';
+import {distance,speed,acceptFix,manualSpeed} from '../src/lib/tools/gps/logic.ts';
 import {permissions,octal} from '../src/lib/tools/chmod/logic.ts';
 import {cron,explainCron} from '../src/lib/tools/cron/logic.ts';
 import {shellQuote} from '../src/lib/tools/shell/logic.ts';
@@ -37,6 +37,7 @@ test('BMI is numeric and never applies adult thresholds to growing users',()=>{
  assert.equal(bmi(200,80,false).value,20);
  assert.match(bmi(160,50,true).note,/成人.*適用しません/);
  assert.throws(()=>bmi(0,60,false));
+ assert.throws(()=>bmi(Number.MIN_VALUE,60,false));
 });
 test('deviation and population/sample statistics handle zero variance',()=>{
  assert.equal(deviation(80,60,10),70);
@@ -61,6 +62,8 @@ test('GPS geodesic distance, units and accuracy/speed gates',()=>{
  assert.equal(speed(10,'km/h'),36);assert.equal(speed(10,'m/s'),10);
  assert.equal(acceptFix({lat:35,lon:139,accuracy:100,time:1000}),false);
  assert.equal(acceptFix({lat:35,lon:139,accuracy:5,time:1000}),true);
+ assert.throws(()=>manualSpeed(Number.MAX_VALUE,Number.MIN_VALUE));
+ assert.throws(()=>speed(Number.MAX_VALUE,'km/h'));
  assert.equal(acceptFix({lat:35,lon:140,accuracy:5,time:2000},{lat:35,lon:139,accuracy:5,time:1000}),false);
 });
 test('chmod includes special bits and validates octal',()=>{
@@ -68,7 +71,8 @@ test('chmod includes special bits and validates octal',()=>{
 });
 test('cron builds validated five-field expressions, explains ranges and rejects injection',()=>{
  assert.equal(cron(['*/15','9-17','*','*','1-5']),'*/15 9-17 * * 1-5');
- assert.match(explainCron('0 9 * * 1-5'),/月曜日.*金曜日/);
+ assert.match(explainCron('0 9 * * 1-5'),/月曜日〜金曜日/);
+ assert.match(explainCron('*/15 * * * *'),/15ごと/);
  assert.throws(()=>explainCron('60 * * * *'));assert.throws(()=>cron(['*','*','*','*','*\nrm -rf /']));
 });
 test('POSIX quoting treats every string as one literal argument',()=>{
@@ -101,7 +105,8 @@ test('code escape handles JSON and JavaScript Unicode without eval',()=>{
 test('regex builder escapes literals and bounded matcher handles zero-width results',()=>{
  assert.equal(pattern('a.b','literal','+',true),'^(?:a\\.b)+$');
  assert.equal(matchRegex('a+','g','aa b a').matches.length,2);
- assert.equal(matchRegex('(?=a)','g','aa').matches.length,2);assert.throws(()=>matchRegex('a','gg','a'));assert.throws(()=>matchRegex('a'.repeat(2001),'',''));
+ assert.equal(matchRegex('(?=a)','g','aa').matches.length,2);
+ assert.equal(matchRegex('a','y','aa').matches.length,1);assert.throws(()=>matchRegex('a','gg','a'));assert.throws(()=>matchRegex('a'.repeat(2001),'',''));
 });
 test('keyboard tracks physical key codes and ignores repeat duplication',()=>{
  assert.deepEqual(keyState(['KeyA'],'KeyA',true),['KeyA']);assert.deepEqual(keyState(['KeyA'],'KeyA',false),[]);
