@@ -23,5 +23,9 @@
 	"imports": {
 		"#lib": "./src/lib/index.js",
 		"#lib/*": "./src/lib/*"
+	},
+	"dependencies": {
+		"encoding-japanese": "^2.4.0",
+		"qrcode-generator": "^2.0.4"
 	}
 }
