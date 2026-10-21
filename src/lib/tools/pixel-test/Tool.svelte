@@ -1,0 +1,13 @@
+<script lang="ts">
+ import {untrack} from 'svelte';
+ import type {ToolState} from '../../types';
+ import Result from '../../components/Result.svelte';
+ let {state=$bindable()}=$props<{state:ToolState}>();
+ import {onDestroy,tick} from 'svelte';import {colors,nextColor} from './logic';untrack(()=>{state.index??=0;});let active=$state(false),error=$state(''),panel:HTMLDivElement,exitButton:HTMLButtonElement,entered=false;
+ async function start(){active=true;error='';await tick();exitButton?.focus();try{if(!panel.requestFullscreen)throw new Error();await panel.requestFullscreen();entered=true;}catch{error='全画面APIを利用できません。ウィンドウ内の拡大表示で続行します。';}}
+ async function stop(){active=false;entered=false;if(document.fullscreenElement===panel)try{await document.exitFullscreen();}catch{error='全画面の解除に失敗しました。Escを押してください。';}}
+ function fullscreen(){if(entered&&!document.fullscreenElement){active=false;entered=false;}}
+ function key(e:KeyboardEvent){if(!active)return;if(e.key==='Escape'){e.preventDefault();void stop();}else if(['ArrowRight','ArrowDown',' ','ArrowLeft','ArrowUp'].includes(e.key)&&!(e.target as HTMLElement)?.closest('button')){e.preventDefault();state.index=nextColor(state.index,['ArrowLeft','ArrowUp'].includes(e.key)?-1:1);}}
+ onDestroy(()=>{if(document.fullscreenElement===panel)void document.exitFullscreen().catch(()=>{});});
+</script>
+<svelte:window onkeydown={key}/><svelte:document onfullscreenchange={fullscreen}/><p>単色画面を目視で確認します。故障の自動検出・判定はしません。</p><div class="action-row"><button class="primary" onclick={start}>画面テスト開始</button></div>{#if !active&&error}<p class="error" role="alert">{error}</p>{/if}{#if active}<div bind:this={panel} role="dialog" aria-modal="true" aria-label="画面の単色テスト" tabindex="-1" style:background={colors[state.index]} style="position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:12px"><div style="background:white;color:black;padding:12px;max-width:100%;border:1px solid black"><p style="font-size:12px">{['白','黒','赤','緑','青'][state.index]}：矢印 / Space / ボタンで切替、Escで終了</p>{#if error}<p role="alert" style="font-size:12px">{error}</p>{/if}<div style="display:flex;flex-wrap:wrap;gap:8px"><button style="color:black;background:white" onclick={()=>state.index=nextColor(state.index,-1)}>前の色</button><button style="color:black;background:white" onclick={()=>state.index=nextColor(state.index,1)}>次の色</button><button bind:this={exitButton} style="color:black;background:white" onclick={stop}>終了</button></div></div></div>{/if}<p class="tool-note">例：開始後に赤・緑・青へ切り替え、点灯しない画素を確認。タッチは切替ボタンを使用。明るい画面が苦手な場合は輝度を下げてください。点滅・自動切替はしません。OSやディスプレイ設定によって表示は変わります。</p>
