@@ -1,0 +1,2 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+test('tailwind compiles arbitrary v4 utilities instead of relying on build detection',async()=>{const {compileClasses}=await import('../src/lib/tools/tailwind/logic.ts');const theme=readFileSync('node_modules/tailwindcss/theme.css','utf8');const css=await compileClasses('w-[137px] bg-red-500 hover:p-[19px]',theme);assert.match(css,/137px/);assert.match(css,/19px/);assert.match(css,/red-500/);await assert.rejects(()=>compileClasses('x'.repeat(20001),theme));});
