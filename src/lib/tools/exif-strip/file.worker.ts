@@ -1,0 +1,1 @@
+import {stripMetadata} from './logic';self.onmessage=(e)=>{try{const result=stripMetadata(e.data);self.postMessage({result},[result.bytes.buffer]);}catch(error){self.postMessage({error:(error as Error).message});}};
