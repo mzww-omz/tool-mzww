@@ -3,7 +3,7 @@
  import type { ToolState } from '../../types';
  import { convert, groups } from './logic';
  import Result from '../../components/Result.svelte';
- let {state=$bindable()}=$props<{state:ToolState}>();
+ let {state=$bindable()}: {state:ToolState} = $props();
  untrack(()=>{state.group??='長さ';state.from??='m';state.to??='km';state.value??=1;state.output??='';state.error??='';});
  let units=$derived(Object.keys(groups[state.group]));
  function changeGroup(){const keys=Object.keys(groups[state.group]);state.from=keys[0];state.to=keys[1];state.output='';state.error='';}

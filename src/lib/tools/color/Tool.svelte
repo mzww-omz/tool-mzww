@@ -3,7 +3,7 @@
  import type { ToolState } from '../../types';
  import { color } from './logic';
  import Result from '../../components/Result.svelte';
- let {state=$bindable()}=$props<{state:ToolState}>();
+ let {state=$bindable()}: {state:ToolState} = $props();
  untrack(()=>{state.input??='#EB541D';state.output??='';state.preview??='#EB541D';state.error??='';});
  function run(){try{const c=color(state.input);state.output=`${c.hex}\n${c.rgb}\n${c.hsl}`;state.preview=c.hex;state.error='';}catch(e){state.error=(e as Error).message;state.output='';}}
 </script>

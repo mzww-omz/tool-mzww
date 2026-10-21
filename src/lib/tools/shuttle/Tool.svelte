@@ -1,6 +1,6 @@
 <script lang="ts">
  import {onDestroy,onMount,untrack} from 'svelte';import {shuttlePlan,shuttleAt,source} from './logic';import {durationText} from '../timer/logic';import {createTone} from '../../tone';import CopyButton from '../../components/CopyButton.svelte';import type {ToolState} from '../../types';
- let {state:data=$bindable()}=$props<{state:ToolState}>();untrack(()=>{data.elapsed??=0;data.ended??=false;data.error??='';});
+ let {state:data=$bindable()}: {state:ToolState} = $props();untrack(()=>{data.elapsed??=0;data.ended??=false;data.error??='';});
  const plan=shuttlePlan(),tone=createTone();let running=$state(false),starting=$state(false),elapsed=$state(0),timer:ReturnType<typeof setInterval>|undefined,started=0,scheduled=0,request=0;
  let progress=$derived(shuttleAt(plan,elapsed));
  function pause(){request++;starting=false;if(running){data.elapsed+=Math.max(0,performance.now()-started);elapsed=data.elapsed;}running=false;if(timer)clearInterval(timer);timer=undefined;tone.silence();}

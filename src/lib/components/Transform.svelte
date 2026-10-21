@@ -2,7 +2,7 @@
  import { untrack } from 'svelte';
  import type { ToolState } from '../types';
  import Result from './Result.svelte';
- let { state=$bindable(), actions, placeholder='変換するテキストを入力…', note='' } = $props<{state:ToolState; actions:{label:string; run:(text:string)=>string}[];placeholder?:string;note?:string}>();
+ let { state=$bindable(), actions, placeholder='変換するテキストを入力…', note='' }: {state:ToolState; actions:{label:string; run:(text:string)=>string}[];placeholder?:string;note?:string} = $props();
  untrack(()=>{state.text ??= ''; state.output ??= ''; state.error ??= '';});
  function run(fn:(text:string)=>string) { try { state.output=fn(state.text); state.error=''; } catch(e) { state.error=e instanceof Error?e.message:String(e); state.output=''; } }
 </script>

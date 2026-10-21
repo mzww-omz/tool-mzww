@@ -2,7 +2,7 @@
  import {untrack} from 'svelte';
  import type {ToolState} from '../../types';
  import Result from '../../components/Result.svelte';
- let {state=$bindable()}=$props<{state:ToolState}>();
+ let {state=$bindable()}: {state:ToolState} = $props();
  import {renderMarkdown} from './logic';import {previewDocument,safePreviewHTML} from '../../preview';import {download} from '../../browser-files';untrack(()=>{state.input??='# こんにちは\n\n| 道具 | 個数 |\n| --- | --- |\n| TOOLBOX | 56 |\n\n```js\nconsole.log("Hello")\n```';});let result=$derived.by(()=>{try{return {html:renderMarkdown(state.input),error:''};}catch(e){return {html:'',error:(e as Error).message};}});let document=$derived(previewDocument(safePreviewHTML(result.html),'body{font:16px/1.7 sans-serif;overflow-wrap:anywhere}pre{white-space:pre-wrap}table,td,th{border:1px solid #777;border-collapse:collapse;padding:8px}'));
  
 </script>

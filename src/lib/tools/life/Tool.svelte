@@ -2,7 +2,7 @@
  import { tick, untrack } from 'svelte';
  import type { ToolState } from '../../types';
  import { step } from './logic';
- let {state: data=$bindable()}=$props<{state:ToolState}>();
+ let {state: data=$bindable()}: {state:ToolState} = $props();
  const width=32,height=20;
  function seed(){const b=Array(width*height).fill(0);[9*width+16,10*width+17,11*width+15,11*width+16,11*width+17].forEach(i=>b[i]=1);return b;}
  untrack(()=>{data.board??=seed();data.generation??=0;data.speed??=160;});

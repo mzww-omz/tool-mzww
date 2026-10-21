@@ -2,7 +2,7 @@
  import {keyState,rows} from './logic';
  import type {ToolState} from '../../types';
  // Accept the workspace binding, but never retain key data in it.
- let {state: ephemeral=$bindable()}=$props<{state:ToolState}>();
+ let {state: ephemeral=$bindable()}: {state:ToolState} = $props();
  let down=$state<string[]>([]),last=$state(''),enabled=$state(false);
  function key(event:KeyboardEvent,pressed:boolean){if(!enabled)return;if(event.key==='Tab'||event.key==='Escape'){enabled=false;down=[];last='';return;}event.preventDefault();down=keyState(down,event.code,pressed);last=JSON.stringify({key:event.key,code:event.code,repeat:event.repeat,location:event.location,ctrl:event.ctrlKey,alt:event.altKey,shift:event.shiftKey,meta:event.metaKey},null,2);}
  function stop(){enabled=false;down=[];last='';}

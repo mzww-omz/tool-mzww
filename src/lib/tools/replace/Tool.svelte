@@ -3,7 +3,7 @@
  import type { ToolState } from '../../types';
  import Result from '../../components/Result.svelte';
  import { replaceAll } from './logic';
- let {state=$bindable()}=$props<{state:ToolState}>();
+ let {state=$bindable()}: {state:ToolState} = $props();
  untrack(()=>{state.text??='';state.search??='';state.replacement??='';state.output??='';state.error??='';});
  function run(){try{state.output=replaceAll(state.text,state.search,state.replacement);state.error='';}catch(e){state.error=(e as Error).message;}}
 </script>

@@ -1,6 +1,6 @@
 <script lang="ts">
  import {onMount,onDestroy,untrack} from 'svelte';import {elapsed,timerValue,durationText,type Timer} from './logic';import {createTone} from '../../tone';import type {ToolState} from '../../types';
- let {state:data=$bindable()}=$props<{state:ToolState}>();untrack(()=>{data.timers??=[];data.kind??='countdown';data.seconds??=300;data.name??='';data.sound??=true;data.error??='';});let now=$state(Date.now());const tone=createTone();
+ let {state:data=$bindable()}: {state:ToolState} = $props();untrack(()=>{data.timers??=[];data.kind??='countdown';data.seconds??=300;data.name??='';data.sound??=true;data.error??='';});let now=$state(Date.now());const tone=createTone();
  function add(){const seconds=Number(data.seconds);if(data.timers.length>=20||data.kind==='countdown'&&(!Number.isFinite(seconds)||seconds<=0||seconds>604800)){data.error='最大20件、カウントダウンは0超〜604,800秒（7日）にしてください。';return;}data.timers=[...data.timers,{id:crypto.randomUUID(),name:data.name.trim()||`タイマー ${data.timers.length+1}`,kind:data.kind,duration:data.kind==='countdown'?seconds*1000:0,accumulated:0,startedAt:null,alerted:false}];data.error='';}
  async function toggle(timer:Timer){
   if(timer.startedAt!==null){timer.accumulated=elapsed(timer,Date.now());timer.startedAt=null;return;}

@@ -1,6 +1,6 @@
 <script lang="ts">
  import {onMount,untrack} from 'svelte';import {zoned} from './logic';import CopyButton from '../../components/CopyButton.svelte';import type {ToolState} from '../../types';
- let {state:data=$bindable()}=$props<{state:ToolState}>();untrack(()=>{data.zone??='Asia/Tokyo';data.zones??=['Asia/Tokyo','UTC','America/New_York'];data.mode??='digital';data.error??='';});let now=$state(Date.now());let current=$derived(zoned(now,data.zones[0]||'UTC'));
+ let {state:data=$bindable()}: {state:ToolState} = $props();untrack(()=>{data.zone??='Asia/Tokyo';data.zones??=['Asia/Tokyo','UTC','America/New_York'];data.mode??='digital';data.error??='';});let now=$state(Date.now());let current=$derived(zoned(now,data.zones[0]||'UTC'));
  onMount(()=>{const interval=setInterval(()=>now=Date.now(),250);return ()=>clearInterval(interval);});
  function add(){try{zoned(now,data.zone);if(data.zones.length>=12)throw new Error('最大12地域です。');if(!data.zones.includes(data.zone))data.zones=[...data.zones,data.zone];data.error='';}catch(e){data.error=`有効なIANAタイムゾーンを入力してください。${(e as Error).message}`;}}
  const two=(value:number)=>String(value).padStart(2,'0');

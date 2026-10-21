@@ -1,6 +1,6 @@
 <script lang="ts">
  import {onDestroy,untrack} from 'svelte';import {distance,speed,acceptFix,manualSpeed,type Fix} from './logic';import {durationText} from '../timer/logic';import CopyButton from '../../components/CopyButton.svelte';import type {ToolState} from '../../types';
- let {state:data=$bindable()}=$props<{state:ToolState}>();untrack(()=>{data.unit??='km/h';data.mode??='gps';data.meters??=0;data.elapsed??=0;data.maximum??=0;data.manualMeters??=100;data.seconds??=10;data.output??='';data.error??='';});
+ let {state:data=$bindable()}: {state:ToolState} = $props();untrack(()=>{data.unit??='km/h';data.mode??='gps';data.meters??=0;data.elapsed??=0;data.maximum??=0;data.manualMeters??=100;data.seconds??=10;data.output??='';data.error??='';});
  let running=$state(false),current=$state(0),now=$state(Date.now()),accuracy=$state<number|null>(null),status=$state('停止中');let watch:number|undefined,last:Fix|undefined,started=0,tick:ReturnType<typeof setInterval>|undefined;
  let elapsed=$derived(data.elapsed+(running?now-started:0));let average=$derived(elapsed>0?data.meters/(elapsed/1000):0);
  function stop(){if(watch!==undefined)navigator.geolocation.clearWatch(watch);watch=undefined;if(tick)clearInterval(tick);if(running)data.elapsed+=Math.max(0,Date.now()-started);running=false;last=undefined;current=0;status='停止中';}

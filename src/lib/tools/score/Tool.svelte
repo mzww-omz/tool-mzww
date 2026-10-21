@@ -1,6 +1,6 @@
 <script lang="ts">
  import {untrack} from 'svelte';import {changeScore,type Team} from './logic';import CopyButton from '../../components/CopyButton.svelte';import type {ToolState} from '../../types';
- let {state:data=$bindable()}=$props<{state:ToolState}>();untrack(()=>{data.teams??=[{name:'チーム A',score:0},{name:'チーム B',score:0}];data.history??=[];data.error??='';});let board:HTMLDivElement;
+ let {state:data=$bindable()}: {state:ToolState} = $props();untrack(()=>{data.teams??=[{name:'チーム A',score:0},{name:'チーム B',score:0}];data.history??=[];data.error??='';});let board:HTMLDivElement;
  function snapshot(){data.history=[...data.history,data.teams.map((t:Team)=>({...t}))].slice(-100);}
  function change(index:number,delta:number){try{const next=changeScore(data.teams,index,delta);snapshot();data.teams=next;data.error='';}catch(e){data.error=(e as Error).message;}}
  function count(amount:number){snapshot();data.teams=Array.from({length:amount},(_,i)=>data.teams[i]||{name:`チーム ${String.fromCharCode(65+i)}`,score:0});}

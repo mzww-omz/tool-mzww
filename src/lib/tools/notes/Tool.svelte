@@ -1,6 +1,6 @@
 <script lang="ts">
  import {onMount,untrack} from 'svelte';import type {ToolState} from '../../types';import {importNotes,searchNotes,type Note} from './logic';import {allRecords,writeRecords} from '../../local-db';import {download} from '../../browser-files';import CopyButton from '../../components/CopyButton.svelte';
- let {state:data=$bindable()}=$props<{state:ToolState}>();untrack(()=>{data.notes??=[];data.selected??='';data.query??='';data.error??='';data.loaded??=false;});
+ let {state:data=$bindable()}: {state:ToolState} = $props();untrack(()=>{data.notes??=[];data.selected??='';data.query??='';data.error??='';data.loaded??=false;});
  let status=$state(''),busy=$state(false);let selected=$derived((data.notes as Note[]).find(n=>n.id===data.selected));let filtered=$derived(searchNotes(data.notes,data.query));
  onMount(()=>{if(data.loaded)return;allRecords<Note>('notes').then(notes=>{if(notes.length>250||notes.some(n=>typeof n.id!=='string'||typeof n.title!=='string'||typeof n.body!=='string'||n.body.length>100000))throw new Error('保存済みメモの形式が無効です。');data.notes=notes;data.selected=notes[0]?.id||'';data.loaded=true;}).catch(e=>data.error=`読み込み失敗: ${e.message}`);});
  async function save(note:Note){const snapshot={...note,updated:Date.now()};note.updated=snapshot.updated;status='保存中…';try{await writeRecords('notes',[snapshot]);status='端末内に保存しました';data.error='';}catch(e){status='未保存';data.error=`保存できません。エクスポートで退避してください。${(e as Error).message}`;}}

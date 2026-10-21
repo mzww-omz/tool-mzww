@@ -3,7 +3,7 @@
  import type { ToolState } from '../../types';
  import { diff } from './logic';
  import CopyButton from '../../components/CopyButton.svelte';
- let {state=$bindable()}=$props<{state:ToolState}>();
+ let {state=$bindable()}: {state:ToolState} = $props();
  untrack(()=>{state.before??='';state.after??='';state.result??=[];state.error??='';});
  function compare(){try{state.result=diff(state.before.replace(/\r\n?/g,'\n'),state.after.replace(/\r\n?/g,'\n'));state.error='';}catch(e){state.error=(e as Error).message;state.result=[];}}
 </script>

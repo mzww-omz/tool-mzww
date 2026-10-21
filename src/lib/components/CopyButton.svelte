@@ -1,5 +1,5 @@
 <script lang="ts">
- let { text, label = 'コピー' } = $props<{text:string;label?:string}>();
+ let { text, label = 'コピー' }: {text:string;label?:string} = $props();
  let status = $state('');
  $effect(()=>{text;status='';});
  async function copy() {

@@ -1,6 +1,6 @@
 <script lang="ts">
  import {untrack} from 'svelte';import {pattern} from './logic';import Result from '../../components/Result.svelte';import CopyButton from '../../components/CopyButton.svelte';import type {ToolState} from '../../types';
- let {state:data=$bindable()}=$props<{state:ToolState}>();untrack(()=>{data.source??='\\d+';data.flags??='g';data.text??='ID: 123 / 456';data.literal??='';data.kind??='literal';data.repeat??='';data.anchor??=false;data.parts??=[];data.output??='';data.error??='';data.status??='';});
+ let {state:data=$bindable()}: {state:ToolState} = $props();untrack(()=>{data.source??='\\d+';data.flags??='g';data.text??='ID: 123 / 456';data.literal??='';data.kind??='literal';data.repeat??='';data.anchor??=false;data.parts??=[];data.output??='';data.error??='';data.status??='';});
  function add(){try{data.parts=[...data.parts,pattern(data.literal,data.kind,data.repeat,false)];build();data.error='';}catch(e){data.error=(e as Error).message;}}
  function build(){data.source=(data.anchor?'^':'')+data.parts.join('')+(data.anchor?'$':'');}
  $effect(()=>{

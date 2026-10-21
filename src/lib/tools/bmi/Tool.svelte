@@ -1,6 +1,6 @@
 <script lang="ts">
  import {untrack} from 'svelte';import {bmi} from './logic';import Result from '../../components/Result.svelte';import type {ToolState} from '../../types';
- let {state=$bindable()}=$props<{state:ToolState}>();untrack(()=>{state.height??=170;state.weight??=60;state.growing??=true;state.output??='';state.error??='';});
+ let {state=$bindable()}: {state:ToolState} = $props();untrack(()=>{state.height??=170;state.weight??=60;state.growing??=true;state.output??='';state.error??='';});
  function run(){try{const result=bmi(Number(state.height),Number(state.weight),state.growing);state.output=`BMI: ${result.value.toFixed(2)}\n\n${result.note}`;state.error='';}catch(e){state.error=(e as Error).message;state.output='';}}
 </script>
 <div class="form-grid"><label>身長 / cm<input type="number" min="0.1" max="300" step="any" bind:value={state.height}/></label><label>体重 / kg<input type="number" min="0.1" max="1000" step="any" bind:value={state.weight}/></label></div>

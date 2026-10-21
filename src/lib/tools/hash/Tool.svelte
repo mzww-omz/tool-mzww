@@ -3,7 +3,7 @@
  import type { ToolState } from '../../types';
  import { hash } from './logic';
  import Result from '../../components/Result.svelte';
- let {state: data=$bindable()}=$props<{state:ToolState}>();
+ let {state: data=$bindable()}: {state:ToolState} = $props();
  untrack(()=>{data.text??='';data.algorithm??='SHA-256';data.output??='';data.error??='';data.file??=null;data.filename??='';});
  let busy=$derived(data.busy ?? false);
  let fileInput:HTMLInputElement;

@@ -3,7 +3,7 @@
  import type { ToolState } from '../../types';
  import { randomIntegers } from './logic';
  import Result from '../../components/Result.svelte';
- let {state=$bindable()}=$props<{state:ToolState}>();
+ let {state=$bindable()}: {state:ToolState} = $props();
  untrack(()=>{state.min??=1;state.max??=100;state.amount??=10;state.output??='';state.error??='';});
  function run(){try{state.output=randomIntegers(Number(state.min),Number(state.max),Number(state.amount)).join('\n');state.error='';}catch(e){state.error=(e as Error).message;state.output='';}}
 </script>

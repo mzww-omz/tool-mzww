@@ -1,6 +1,6 @@
 <script lang="ts">
  import {untrack} from 'svelte';import {deviation,statistics} from './logic';import Result from '../../components/Result.svelte';import type {ToolState} from '../../types';
- let {state=$bindable()}=$props<{state:ToolState}>();untrack(()=>{state.score??=80;state.mean??=60;state.sd??=10;state.scores??='';state.sample??=false;state.output??='';state.error??='';});
+ let {state=$bindable()}: {state:ToolState} = $props();untrack(()=>{state.score??=80;state.mean??=60;state.sd??=10;state.scores??='';state.sample??=false;state.output??='';state.error??='';});
  function run(multiple=false){try{if(multiple){const s=statistics(state.scores,state.sample);state.mean=s.mean;state.sd=s.sd;state.output=`件数: ${s.count}\n平均: ${s.mean}\n${state.sample?'標本':'母'}標準偏差: ${s.sd}\n`+(s.sd>0?`指定得点の偏差値: ${deviation(Number(state.score),s.mean,s.sd).toFixed(3)}`:'分散が0のため偏差値は定義できません。');}else{state.output=`偏差値: ${deviation(Number(state.score),Number(state.mean),Number(state.sd)).toFixed(3)}`;}state.error='';}catch(e){state.error=(e as Error).message;state.output='';}}
 </script>
 <div class="form-grid three"><label>得点<input type="number" step="any" bind:value={state.score}/></label><label>平均<input type="number" step="any" bind:value={state.mean}/></label><label>標準偏差<input type="number" min="0" step="any" bind:value={state.sd}/></label></div>

@@ -1,6 +1,6 @@
 <script lang="ts">
  import {onMount,untrack} from 'svelte';import {calendarDays,dateKey,validateEvent,type CalendarEvent} from './logic';import {allRecords,writeRecords} from '../../local-db';import CopyButton from '../../components/CopyButton.svelte';import type {ToolState} from '../../types';
- let {state:data=$bindable()}=$props<{state:ToolState}>();untrack(()=>{data.date??=dateKey(new Date());data.view??='month';data.events??=[];data.loaded??=false;data.error??='';data.draft??={id:'',title:'',start:data.date+'T09:00',end:data.date+'T10:00'};});
+ let {state:data=$bindable()}: {state:ToolState} = $props();untrack(()=>{data.date??=dateKey(new Date());data.view??='month';data.events??=[];data.loaded??=false;data.error??='';data.draft??={id:'',title:'',start:data.date+'T09:00',end:data.date+'T10:00'};});
  let busy=$state(false);let days=$derived(calendarDays(data.date,data.view));
  onMount(()=>{if(data.loaded)return;allRecords<CalendarEvent>('events').then(events=>{if(events.length>2000)throw new Error('予定が2,000件を超えています。');data.events=events.map(validateEvent);data.loaded=true;}).catch(e=>data.error=`読み込み失敗: ${e.message}`);});
  function navigate(delta:number){const date=new Date(data.date+'T12:00:00');if(data.view==='week')date.setDate(date.getDate()+delta*7);else{date.setDate(1);date.setMonth(date.getMonth()+delta);}const key=dateKey(date);selectDate(key);}

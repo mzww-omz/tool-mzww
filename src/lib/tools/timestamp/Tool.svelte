@@ -3,7 +3,7 @@
  import type { ToolState } from '../../types';
  import { timestamp } from './logic';
  import Result from '../../components/Result.svelte';
- let {state=$bindable()}=$props<{state:ToolState}>();
+ let {state=$bindable()}: {state:ToolState} = $props();
  untrack(()=>{state.input??='';state.mode??='seconds';state.output??='';state.error??='';});
  function run(){try{const t=timestamp(state.input,state.mode);state.output=`UNIX (秒): ${t.seconds}\nUNIX (ミリ秒): ${t.milliseconds}\nUTC: ${t.iso}\nローカル: ${t.local}`;state.error='';}catch(e){state.error=(e as Error).message;state.output='';}}
 </script>

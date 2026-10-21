@@ -3,7 +3,7 @@
  import Transform from '../../components/Transform.svelte';
  import {url} from './logic';
  import type {ToolState} from '../../types';
- let {state=$bindable()}=$props<{state:ToolState}>();
+ let {state=$bindable()}: {state:ToolState} = $props();
  untrack(()=>{state.mode??='component';});
 </script>
 <label class="short-field">変換形式<select bind:value={state.mode}><option value="component">構成要素（encodeURIComponent）</option><option value="full">URL全体（encodeURI）</option><option value="form">フォームの単一値（空白 ↔ +）</option></select></label>

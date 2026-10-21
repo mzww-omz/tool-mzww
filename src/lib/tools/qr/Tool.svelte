@@ -1,6 +1,6 @@
 <script lang="ts">
  import {untrack} from 'svelte';import {qrMatrix,qrSvg} from './logic';import {download} from '../../browser-files';import type {ToolState} from '../../types';
- let {state:data=$bindable()}=$props<{state:ToolState}>();untrack(()=>{data.text??='';data.size??=320;data.level??='M';data.svg??='';data.error??='';});let preview=$state('');let busy=$state(false);
+ let {state:data=$bindable()}: {state:ToolState} = $props();untrack(()=>{data.text??='';data.size??=320;data.level??='M';data.svg??='';data.error??='';});let preview=$state('');let busy=$state(false);
  $effect(()=>{if(data.svg){const url=URL.createObjectURL(new Blob([data.svg],{type:'image/svg+xml'}));preview=url;return ()=>URL.revokeObjectURL(url);}preview='';});
  function generate(){try{data.svg=qrSvg(qrMatrix(data.text,data.level),Number(data.size));data.error='';}catch(e){data.error=(e as Error).message;data.svg='';}}
  async function savePng(){busy=true;try{const img=new Image();img.src=preview;await img.decode();const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const ctx=c.getContext('2d');if(!ctx)throw new Error('Canvasが利用できません。');ctx.drawImage(img,0,0);const blob=await new Promise<Blob|null>(resolve=>c.toBlob(resolve,'image/png'));if(!blob)throw new Error('PNGを作成できません。');download(blob,'toolbox-qr.png');}catch(e){data.error=(e as Error).message;}finally{busy=false;}}

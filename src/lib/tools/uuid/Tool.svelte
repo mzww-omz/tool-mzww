@@ -3,7 +3,7 @@
  import type { ToolState } from '../../types';
  import { uuids } from './logic';
  import Result from '../../components/Result.svelte';
- let {state=$bindable()}=$props<{state:ToolState}>();
+ let {state=$bindable()}: {state:ToolState} = $props();
  untrack(()=>{state.amount??=1;state.output??='';state.error??='';});
  function generate(){try{state.output=uuids(Number(state.amount)).join('\n');state.error='';}catch(e){state.error=(e as Error).message;}}
 </script>

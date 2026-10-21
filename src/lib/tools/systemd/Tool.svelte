@@ -1,6 +1,6 @@
 <script lang="ts">
  import {untrack} from 'svelte';import {systemd} from './logic';import Result from '../../components/Result.svelte';import {download} from '../../browser-files';import type {ToolState} from '../../types';
- let {state=$bindable()}=$props<{state:ToolState}>();untrack(()=>{state.description??='My application';state.executable??='/usr/bin/node';state.args??='/opt/app/main.js';state.user??='app';state.restart??='on-failure';state.output??='';state.error??='';});
+ let {state=$bindable()}: {state:ToolState} = $props();untrack(()=>{state.description??='My application';state.executable??='/usr/bin/node';state.args??='/opt/app/main.js';state.user??='app';state.restart??='on-failure';state.output??='';state.error??='';});
  function run(){try{state.output=systemd(state.description,state.executable,state.args?state.args.split('\n'):[],state.user,state.restart);state.error='';}catch(e){state.error=(e as Error).message;state.output='';}}
 </script>
 <div class="form-grid"><label>説明<input bind:value={state.description} maxlength="1000"/></label><label>実行ファイルの絶対パス<input bind:value={state.executable} maxlength="1000"/></label><label>実行ユーザー<input bind:value={state.user} maxlength="64"/></label><label>Restart<select bind:value={state.restart}><option>no</option><option>on-failure</option><option>always</option></select></label></div>

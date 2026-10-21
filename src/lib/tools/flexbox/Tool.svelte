@@ -2,7 +2,7 @@
  import {untrack} from 'svelte';
  import type {ToolState} from '../../types';
  import Result from '../../components/Result.svelte';
- let {state=$bindable()}=$props<{state:ToolState}>();
+ let {state=$bindable()}: {state:ToolState} = $props();
  import {layoutCSS} from './logic';import {previewDocument} from '../../preview';
  untrack(()=>{state.direction??='row';state.justify??='flex-start';state.align??='stretch';state.wrap??='wrap';state.gap??=16;state.columns??='repeat(3, minmax(0, 1fr))';state.rows??='auto';state.items??=Array.from({length:3},()=>({grow:0,shrink:1,basis:'80px',column:'auto',row:'auto'}));});
  let result=$derived.by(()=>{try{return {css:layoutCSS(state),error:''};}catch(e){return {css:'',error:(e as Error).message};}});

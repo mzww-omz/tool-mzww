@@ -3,7 +3,7 @@
  import type { ToolState } from '../../types';
  import { count } from './logic';
  import CopyButton from '../../components/CopyButton.svelte';
- let { state = $bindable() } = $props<{state:ToolState}>();
+ let { state = $bindable() }: {state:ToolState} = $props();
  untrack(()=>{state.text ??= '';});
  let stats = $derived(count(state.text));
  const sample='小さな道具で、日々を少し軽やかに。\n\nTOOLBOXは、ブラウザだけで使えるツール集です。\nテキストの編集から、開発、画像処理まで。\n必要なときに、必要な道具を。\n\nSmall tools. More possibilities.';

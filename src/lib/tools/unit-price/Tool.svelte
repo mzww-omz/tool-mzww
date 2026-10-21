@@ -2,7 +2,7 @@
  import {untrack} from 'svelte';
  import type {ToolState} from '../../types';
  import Result from '../../components/Result.svelte';
- let {state=$bindable()}=$props<{state:ToolState}>();
+ let {state=$bindable()}: {state:ToolState} = $props();
  import {compare,units} from './logic';untrack(()=>{state.items??=[{name:'商品A',price:300,quantity:500,unit:'g'},{name:'商品B',price:550,quantity:1,unit:'kg'}];});let result=$derived.by(()=>{try{return {value:compare(state.items),error:''};}catch(e){return {value:null,error:(e as Error).message};}});
 </script>
 {#each state.items as item,i}<fieldset><legend>商品 {i+1}</legend><div class="form-grid"><label>名前<input bind:value={item.name} maxlength="100"/></label><label>価格 (円)<input type="number" min="0" step="any" bind:value={item.price}/></label><label>数量<input type="number" min="0" step="any" bind:value={item.quantity}/></label><label>単位<select bind:value={item.unit}>{#each Object.keys(units) as unit}<option>{unit}</option>{/each}</select></label></div><button disabled={state.items.length===1} onclick={()=>state.items.splice(i,1)}>商品 {i+1} を削除</button>{#if result.value}<p><strong>{result.value.items[i].value.toLocaleString('ja-JP',{maximumFractionDigits:6})} {result.value.items[i].label}</strong> {result.value.items[i].value===result.value.items[result.value.best].value?'— 最安':''}</p>{/if}</fieldset>{/each}<button disabled={state.items.length>=20} onclick={()=>state.items.push({name:`商品${state.items.length+1}`,price:100,quantity:1,unit:state.items[0].unit})}>商品を追加</button>{#if result.error}<p class="error" role="alert">{result.error}</p>{/if}<p class="tool-note">例：300円/500g と 550円/1kg → 60円/100g と 55円/100g。重さ・容量・個数を混ぜた比較はできません。最大20商品、表示は小数6桁まで（比較は丸め前）。</p>

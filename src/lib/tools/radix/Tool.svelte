@@ -3,7 +3,7 @@
  import type { ToolState } from '../../types';
  import { radix } from './logic';
  import Result from '../../components/Result.svelte';
- let {state=$bindable()}=$props<{state:ToolState}>();
+ let {state=$bindable()}: {state:ToolState} = $props();
  untrack(()=>{state.input??='';state.from??=10;state.to??=2;state.output??='';state.error??='';});
  function run(){try{state.output=radix(state.input.trim(),Number(state.from),Number(state.to));state.error='';}catch(e){state.error=(e as Error).message;state.output='';}}
 </script>

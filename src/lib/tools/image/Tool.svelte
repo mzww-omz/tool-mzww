@@ -2,7 +2,7 @@
  import { untrack } from 'svelte';
  import type { ToolState } from '../../types';
  import { dimensions } from './logic';
- let {state: data=$bindable()}=$props<{state:ToolState}>();
+ let {state: data=$bindable()}: {state:ToolState} = $props();
  untrack(()=>{data.source??='';data.output??='';data.file??=null;data.width??=800;data.height??=600;data.lock??=true;data.format??='image/png';data.quality??=90;data.error??='';data.size??=0;});
  let busy=$derived(data.busy ?? false);
  let input:HTMLInputElement;
