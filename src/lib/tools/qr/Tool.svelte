@@ -1,0 +1,11 @@
+<script lang="ts">
+ import {untrack} from 'svelte';import {qrMatrix,qrSvg} from './logic';import {download} from '../../browser-files';import type {ToolState} from '../../types';
+ let {state:data=$bindable()}=$props<{state:ToolState}>();untrack(()=>{data.text??='';data.size??=320;data.level??='M';data.svg??='';data.error??='';});let preview=$state('');let busy=$state(false);
+ $effect(()=>{if(data.svg){const url=URL.createObjectURL(new Blob([data.svg],{type:'image/svg+xml'}));preview=url;return ()=>URL.revokeObjectURL(url);}preview='';});
+ function generate(){try{data.svg=qrSvg(qrMatrix(data.text,data.level),Number(data.size));data.error='';}catch(e){data.error=(e as Error).message;data.svg='';}}
+ async function savePng(){busy=true;try{const img=new Image();img.src=preview;await img.decode();const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const ctx=c.getContext('2d');if(!ctx)throw new Error('Canvasが利用できません。');ctx.drawImage(img,0,0);const blob=await new Promise<Blob|null>(resolve=>c.toBlob(resolve,'image/png'));if(!blob)throw new Error('PNGを作成できません。');download(blob,'toolbox-qr.png');}catch(e){data.error=(e as Error).message;}finally{busy=false;}}
+</script>
+<label>文字列・URL（UTF-8で2,000バイトまで）<textarea bind:value={data.text} maxlength="2000" rows="4" placeholder="https://example.com"></textarea></label>
+<div class="form-grid"><label>サイズ / px<input type="number" min="29" max="2048" bind:value={data.size}/></label><label>誤り訂正レベル<select bind:value={data.level}><option value="L">L（約7%）</option><option value="M">M（約15%）</option><option value="Q">Q（約25%）</option><option value="H">H（約30%）</option></select></label></div>
+<div class="action-row"><button class="primary" onclick={generate} disabled={busy}>QRコードを生成</button><button disabled={!data.svg||busy} onclick={savePng}>PNG保存</button><button disabled={!data.svg} onclick={()=>download(new Blob([data.svg],{type:'image/svg+xml'}),'toolbox-qr.svg')}>SVG保存</button><button disabled={busy} onclick={()=>{data.svg='';data.text='';data.error='';}}>クリア</button></div>
+{#if data.error}<p role="alert" class="error">{data.error}</p>{/if}{#if preview}<div class="qr-preview"><img src={preview} alt="生成したQRコード"/></div>{/if}<p class="tool-note">4モジュールの余白を確保。内容量・訂正レベルによって最大容量は異なります。保存したQRは実機で読み取りを確認してください。URLを開いたり内容を送信したりしません。</p>
