@@ -1,0 +1,9 @@
+<script lang="ts">
+ import {untrack} from 'svelte';import {permissions,octal} from './logic';import Result from '../../components/Result.svelte';import type {ToolState} from '../../types';
+ let {state=$bindable()}=$props<{state:ToolState}>();untrack(()=>{state.input??='755';state.bits??=[true,true,true,true,false,true,true,false,true];state.special??=0;state.output??='';state.error??='';});
+ function run(fromBits=false){try{if(fromBits)state.input=octal(state.bits,Number(state.special));const symbolic=permissions(state.input);const digits=state.input.padStart(4,'0').split('').map(Number);state.special=digits[0];state.bits=digits.slice(1).flatMap(n=>[!!(n&4),!!(n&2),!!(n&1)]);state.output=`${state.input}\n${symbolic}\nchmod ${state.input} -- <path>`;state.error='';}catch(e){state.error=(e as Error).message;}}
+</script>
+<div class="form-grid"><label>8進数<input bind:value={state.input} maxlength="4" placeholder="755"/></label><label>特殊ビット<select bind:value={state.special}>{#each [0,1,2,3,4,5,6,7] as n}<option value={n}>{n}（setuid=4 / setgid=2 / sticky=1）</option>{/each}</select></label></div>
+<table class="utility-table"><thead><tr><th>対象</th><th>読取 r</th><th>書込 w</th><th>実行 x</th></tr></thead><tbody>{#each ['所有者','グループ','その他'] as group,i}<tr><th>{group}</th>{#each ['読み取り','書き込み','実行'] as permission,j}<td><input type="checkbox" aria-label={`${group} ${permission}`} bind:checked={state.bits[i*3+j]}/></td>{/each}</tr>{/each}</tbody></table>
+<div class="action-row"><button class="primary" onclick={()=>run()}>8進数から反映</button><button onclick={()=>run(true)}>チェックから計算</button><button onclick={()=>{state.input='000';state.special=0;state.bits=Array(9).fill(false);run(true);}}>リセット</button></div>
+{#if state.error}<p role="alert" class="error">{state.error}</p>{/if}<Result text={state.output}/><p class="tool-note">実際のファイル権限は変更しません。setuid/setgidや過剰な書き込み権限は慎重に設定してください。</p>
