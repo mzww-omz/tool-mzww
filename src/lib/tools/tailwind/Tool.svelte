@@ -7,7 +7,8 @@
  untrack(()=>{data.html??='<div class="p-6 bg-red-500 text-white">こんにちは TOOLBOX</div>';data.classes??='rounded-none';});
  let css=$state(''),error=$state(''),busy=$state(false);
  $effect(()=>{const html=data.html,classes=data.classes;busy=true;error='';css='';if(html.length>20000){error='HTMLは20,000文字以内です。';busy=false;return;}
- const timer=setTimeout(()=>{const worker=new Worker();const deadline=setTimeout(()=>{worker.terminate();busy=false;error='コンパイルが3秒を超えました。入力を減らしてください。';},3000);worker.onmessage=e=>{clearTimeout(deadline);worker.terminate();css=e.data.css||'';error=e.data.error||'';busy=false;};worker.onerror=()=>{clearTimeout(deadline);worker.terminate();error='コンパイラを起動できません。';busy=false;};worker.postMessage(classes+' '+[...html.matchAll(/class\s*=\s*["']([^"']*)["']/g)].map(m=>m[1]).join(' '));cleanup=()=>{clearTimeout(deadline);worker.terminate();};},180);let cleanup=()=>{};return()=>{clearTimeout(timer);cleanup();};});
+ const elements=new DOMParser().parseFromString(safePreviewHTML(html),'text/html');const classText=[...elements.body.querySelectorAll('[class]')].map(el=>el.getAttribute('class')).join(' ');
+ const timer=setTimeout(()=>{let worker:globalThis.Worker;try{worker=new Worker();}catch{error='コンパイラを起動できません。Workerを利用できるブラウザで開いてください。';busy=false;return;}const deadline=setTimeout(()=>{worker.terminate();busy=false;error='コンパイルが3秒を超えました。入力を減らしてください。';},3000);worker.onmessage=e=>{clearTimeout(deadline);worker.terminate();css=e.data.css||'';error=e.data.error||'';busy=false;};worker.onerror=event=>{event.preventDefault();clearTimeout(deadline);worker.terminate();error='コンパイラを起動できません。';busy=false;};worker.postMessage(classes+' '+classText);cleanup=()=>{clearTimeout(deadline);worker.terminate();};},180);let cleanup=()=>{};return()=>{clearTimeout(timer);cleanup();};});
  let document=$derived(previewDocument(safePreviewHTML(`<div class="${data.classes.replace(/["<>]/g,'')}">${data.html}</div>`),css));
  
 </script>

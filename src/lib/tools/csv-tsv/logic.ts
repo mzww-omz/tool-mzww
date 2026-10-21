@@ -14,5 +14,5 @@ export function parseDelimited(input:string,delimiter=","):string[][] {
 }
 export function serializeDelimited(rows:string[][],delimiter=",") {
  if(![',','\t'].includes(delimiter))throw new Error('区切り文字が無効です。');
- return rows.map(row=>row.map(cell=>cell.includes(delimiter)||/["\r\n]/.test(cell)?'"'+cell.replace(/"/g,'""')+'"':cell).join(delimiter)).join('\r\n');
+ return rows.map(row=>row.map(cell=>cell===''||cell.startsWith('\uFEFF')||cell.includes(delimiter)||/["\r\n]/.test(cell)?'"'+cell.replace(/"/g,'""')+'"':cell).join(delimiter)).join('\r\n');
 }

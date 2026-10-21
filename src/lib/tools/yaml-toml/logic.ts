@@ -10,7 +10,7 @@ export function convert(input:string,from:'yaml'|'toml',to:'yaml'|'toml'|'json')
  let nodes=0;
  function safe(v:any,depth=0):any {
   if(++nodes>20000||depth>64)throw new Error('20,000要素・64階層以内にしてください。');
-  if(v instanceof Date||typeof v==='bigint'&&(v>BigInt(Number.MAX_SAFE_INTEGER)||v<BigInt(Number.MIN_SAFE_INTEGER))||typeof v==='number'&&!Number.isFinite(v))throw new Error('日時型・非有限数・精度を失う整数の変換には対応しません。');
+  if(v instanceof Date||typeof v==='bigint'&&(v>BigInt(Number.MAX_SAFE_INTEGER)||v<BigInt(Number.MIN_SAFE_INTEGER))||typeof v==='number'&&(!Number.isFinite(v)||Math.abs(v)>Number.MAX_SAFE_INTEGER))throw new Error('日時型・非有限数・精度を失う整数の変換には対応しません。');
   if(typeof v==='bigint')return Number(v);
   if(Array.isArray(v))return v.map(x=>safe(x,depth+1));
   if(v&&typeof v==='object') {const out=Object.create(null);for(const [k,x] of v instanceof Map?v.entries():Object.entries(v)){if(typeof k!=='string'||['__proto__','constructor','prototype'].includes(k))throw new Error('非文字列キー・危険なキーは使用できません。');out[k]=safe(x,depth+1);}return out;}
