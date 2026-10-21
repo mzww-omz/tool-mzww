@@ -27,10 +27,13 @@ test('diff detects inserted and deleted lines, and rejects expensive matrices', 
 test('replacement is literal, including dollar expressions, and forbids empty search', () => {
  assert.equal(replaceAll('aaa $&', 'a', '$&'), '$&$&$& $&');
  assert.throws(() => replaceAll('abc', '', 'x'));
+ assert.throws(() => replaceAll('a'.repeat(1000), 'a', 'x'.repeat(10000)), /1,000,000/);
 });
 test('JSON formatting validates syntax and preserves structure', () => {
  assert.equal(formatJson('{"a":[1,true]}', 2), '{\n  "a": [\n    1,\n    true\n  ]\n}');
  assert.throws(() => formatJson('{a:1}', 2));
+ assert.throws(() => formatJson('['.repeat(1000)+'0'+']'.repeat(1000), 2), /64/);
+ assert.throws(() => formatJson(' '.repeat(100001), 2), /100,000/);
 });
 test('Base64 handles UTF-8 and rejects malformed input', () => {
  assert.equal(base64('日本語', false), '5pel5pys6Kqe');
