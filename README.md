@@ -1,56 +1,100 @@
-# sv
+# TOOLBOX
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+日々の作業に使う15種類の道具。Svelte 5 + TypeScript + Vite。既存のSvelteKitをルーティングに使用し、処理はすべてクライアントサイドで実行します。アカウント、DB、外部API、外部フォント、解析サービスはありません。追加依存パッケージなし。
 
-## Creating a project
+## 起動・検証
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
+Node.js **22.18以上**（ViteとNodeのTypeScript実行機能を使用）。
 
 ```sh
-# recreate this project
-npx sv@1.1.1 create --template minimal --no-types --add sveltekit-adapter="adapter:auto" tailwindcss="plugins:none" --install npm tool-mzww
-```
-
-## Adding features
-
-Add features to your project with `sv add`:
-
-```sh
-npx sv add
-```
-
-For example, to add Tailwind CSS:
-
-```sh
-npx sv add tailwindcss
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
+npm ci                 # 初回のみ
+npm run dev -- --port 5174
+npm test               # 15ツールのロジック・境界値テスト
 npm run build
+npm run preview -- --port 4174
 ```
 
-You can preview the production build with `npm run preview`.
+`/` は文字数カウンター、`/tools/:id` で各ツールへ直接アクセスできます。ViteのビルドはTypeScriptの変換であり、独立した型検査ではありません。このリポジトリには型検査用の追加パッケージを導入していません。
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+### ブラウザ統合テスト
+
+`tests/browser-smoke.mjs` はPlaywrightのPageを受け取るテストです。15ツールの入出力、無効JSON、画像変換・ダウンロード、コピー、切り替え時の入力保持、お気に入りと履歴の保存、別名検索、キーボード操作、390px/320px表示、未登録IDを検証します。
+
+アプリと既存のPlaywright / Chrome環境が起動・利用可能な状態で:
+
+```sh
+# Playwrightがプロジェクトから解決できる場合
+npm run test:browser
+
+# 別の場所にインストール済みのPlaywrightを再利用する場合
+PLAYWRIGHT_MODULE=/absolute/path/to/playwright-core/index.mjs npm run test:browser
+
+# 本番プレビューを対象にする場合
+TOOLBOX_URL=http://127.0.0.1:4174 npm run test:browser
+```
+
+初期値は `http://127.0.0.1:5174` とChrome。`PLAYWRIGHT_CHANNEL` で変更できます。ブラウザテスト用パッケージやブラウザ本体の自動ダウンロードはしません。
+
+## 構成
+
+```text
+src/lib/
+  Shell.svelte             # 固定ワークスペース・ナビゲーション・保存
+  registry.ts              # メタデータの自動発見・検索
+  types.ts                 # レジストリの契約
+  components/              # コピー・出力・テキスト変換UI
+  tools/<id>/
+    index.ts               # ID、表示名、英語名、別名、カテゴリ、遅延ロード
+    Tool.svelte            # そのツール専用の自由なUI
+    logic.ts               # DOMに依存しない処理・テスト対象
+src/routes/
+  +layout.ts               # SSR無効（入力はクライアントのみ）
+  +layout.svelte           # ルート切り替えで破棄しないShell
+  tools/[id]/+page.svelte  # 共通の直接アクセスルート
+```
+
+### ツールの追加
+
+1. `src/lib/tools/<一意のid>/` を作成。
+2. `index.ts` から `ToolDefinition` に適合するオブジェクトをdefault export。既存モジュールを参考に、`load: () => import('./Tool.svelte')` を指定。
+3. `Tool.svelte` は `state` を `$bindable()` プロパティとして受け取り、入力・結果を保持。デフォルト値は `untrack` 内で未設定時のみ初期化する。
+4. 処理を `logic.ts` に置き、`tests/*.test.ts` にテストを追加。
+
+レジストリ・カテゴリ・検索・ルート・既存画面の修正は不要です。メタデータのみ最初に読み込み、UIと処理は選択時にチャンク単位で読み込みます。カテゴリは複数所属でき、最初のカテゴリを一覧の見出しに使います。検索は日本語・英語・別名・カテゴリをNFKC正規化し、大文字小文字を区別せず、空白区切りのAND検索を行います。
+
+1,000ツール分の実データによる性能検証は未実施です。現時点ではメタデータのクライアント検索と通常のリスト描画を採用しています。将来、実測で必要になった時点で仮想スクロール等を検討してください。
+
+## 保存・プライバシー
+
+- 入力・結果・画像はメモリ内のみ。ツール切り替えでは保持され、再読み込み・タブを閉じると消えます。
+- お気に入りと最近使用20件の **ツールIDのみ** をlocalStorageに保存。
+- localStorageが無効でも動作し、保存できない旨を画面に表示。
+- アプリ資産の取得以外にネットワーク通信しません。データ送信・外部API呼び出しはありません。
+- Clipboard / Web Crypto用にHTTPSまたはlocalhostで利用してください。
+- `⌘ / Ctrl + K` で検索、Escapeでモバイル一覧やヘルプを閉じます。ライフゲームは矢印キーとSpaceで編集できます。
+
+## 初期ツールと制限
+
+| ツール | 仕様・上限 |
+|---|---|
+| 文字数・行数 | 最大500,000文字。書記素・空白除外・行・言語単位の単語・UTF-8バイトを計測。CRLFは1改行 |
+| テキスト差分 | 行単位LCS。各200,000文字、比較行列100万セル以内。追加・削除記号と色で表示 |
+| 一括置換 | 文字列の完全一致・大文字小文字を区別。正規表現なし。空検索不可。出力100万文字まで |
+| JSON | 整形2/4スペース、圧縮、構文検証。100,000文字・64階層。数値はIEEE 754精度 |
+| Base64 | UTF-8専用。標準アルファベットとパディング。無効Base64・無効UTF-8はエラー |
+| URL | encodeURIComponent / decodeURIComponent。`+` は空白に変換しない |
+| UUID | 暗号学的乱数のv4。最大10,000個 |
+| Hash | SHA-1/256/384/512。テキスト・20MB以下のファイル。SHA-1は互換性用途のみ |
+| UNIX時刻 | 秒・ミリ秒・日時の相互変換。UTCとローカル表示。明示的なタイムゾーンを推奨 |
+| 進数 | 2〜36進数、負の整数、4,096桁まで。BigInt使用。小数・接頭辞なし |
+| 単位 | 長さ・重さ・温度・面積・データ量。結果12桁。絶対零度未満は拒否 |
+| カラー | HEX 3/6桁、整数RGB、HSL。不透明色のみ |
+| 画像 | PNG/JPEG/WebP、10MB・元4,000万画素以下。出力各辺8,192px・合計1,600万画素まで。JPEGは白背景。アニメーション・メタデータ非保持 |
+| 乱数 | 暗号学的乱数＋棄却法。整数、両端含む、重複あり、最大10,000個、範囲幅2³²以内 |
+| ライフゲーム | 32×20、固定死境界、再生・一時停止・1世代・ランダム・グライダー・クリア |
+
+画像の画素数はブラウザのデコーダーで読み取った直後に検証します。圧縮率が極端に高い不正画像について、デコード前のメモリ消費までは完全に防げません。信頼できない巨大画像を開かないでください。
+
+## 配布
+
+既存の `adapter-auto` を維持しています。対応ホスティングではそのままビルドできます。汎用の静的ホスティングへ配布する場合は、別途static adapterと `/tools/*` からSPAエントリへのフォールバック設定が必要です。公開デプロイは行っていません。
