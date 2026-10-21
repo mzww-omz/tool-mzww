@@ -120,7 +120,7 @@ export default async function smoke(page, origin = 'http://127.0.0.1:5174') {
  assert.equal(await page.locator('nav a').count(), 1);
  await page.locator('nav a').first().click();
  assert.equal(await page.locator('#counter-text').inputValue(), '');
- await button('すべて 15').click();
+ await page.getByRole('button',{name:/^すべて \d+$/,exact:true}).click();
  await page.getByRole('textbox', { name:'ツールを検索' }).fill('ベース64');
  assert.equal(await page.locator('nav a').count(), 1);
  assert.equal(await page.locator('nav a').getAttribute('href'), '/tools/base64');
