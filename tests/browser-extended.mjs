@@ -8,7 +8,7 @@ export default async function extended(page,origin='http://127.0.0.1:5174'){
  const dialogs=dialog=>dialog.accept();page.on('dialog',dialogs);
  await page.setViewportSize({width:1440,height:1000});await page.goto(origin);
  await page.locator('nav a').first().waitFor();
- assert.equal(await page.locator('nav a').count(),36);
+ assert.equal(await page.locator('nav a').count(),56);
  const open=async id=>{await page.locator(`nav a[href="/tools/${id}"]`).click();await page.waitForURL(`${origin}/tools/${id}`);await page.locator(`nav a[href="/tools/${id}"][aria-current="page"]`).waitFor();await page.locator('.tool-body .loading').waitFor({state:'hidden'});};
  const button=name=>page.getByRole('button',{name,exact:true});
  const output=()=>page.getByRole('textbox',{name:'出力',exact:true});

@@ -1,5 +1,6 @@
 import smoke from './browser-smoke.mjs';
 import extended from './browser-extended.mjs';
+import added from './browser-new.mjs';
 
 // Reuse an existing Playwright installation; it is not an application dependency.
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -10,6 +11,7 @@ try {
  const origin=process.env.TOOLBOX_URL || 'http://127.0.0.1:5174';
  console.log(await smoke(page,origin));
  console.log(await extended(page,origin));
+ console.log(await added(page,origin));
 } finally {
  await browser.close();
 }
