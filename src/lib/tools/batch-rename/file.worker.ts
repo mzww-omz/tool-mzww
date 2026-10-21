@@ -1,0 +1,1 @@
+import {makeZip} from './logic';self.onmessage=async(e)=>{try{const result=await makeZip(await Promise.all(e.data.map(async(x:any)=>({name:x.name,data:new Uint8Array(await x.file.arrayBuffer())}))));self.postMessage({result},[result.buffer]);}catch(error){self.postMessage({error:(error as Error).message});}};
