@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+
+export default async function categories(page,origin='http://127.0.0.1:5174') {
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto(origin);
+ await page.locator('nav a').first().waitFor();
+ const category=page.getByRole('combobox',{name:'カテゴリ',exact:true});
+ await category.waitFor({timeout:3000});
+ assert.equal(await page.locator('nav a').count(),56);
+ assert.ok(await category.locator('option').count()>10);
+ const height=await category.locator('..').evaluate(el=>el.getBoundingClientRect().height);
+ assert.ok(height<=48,`category row is too tall: ${height}`);
+ await category.selectOption('Web');
+ await page.locator('nav a[href="/tools/flexbox"]').waitFor();
+ assert.equal(await page.locator('nav a[href="/tools/counter"]').count(),0);
+ const search=page.getByRole('textbox',{name:'ツールを検索'});
+ await search.fill('flexbox');
+ assert.equal(await page.locator('nav a').count(),1);
+ await search.fill('');
+ await page.locator('nav a[href="/tools/flexbox"]').click();
+ await page.waitForURL(`${origin}/tools/flexbox`);
+ await page.locator('.tool-body').getByLabel('flex-direction').waitFor();
+ assert.equal(await category.inputValue(),'Web');
+ await category.focus();assert.equal(await category.evaluate(el=>el===document.activeElement),true);
+ await page.keyboard.press('Tab');assert.equal(await category.evaluate(el=>el===document.activeElement),false);
+ await category.selectOption('all');
+ assert.equal(await category.inputValue(),'all');
+ assert.equal(await page.locator('nav a').count(),56);
+ await page.screenshot({path:'/tmp/toolbox-categories-desktop.png'});
+ await page.setViewportSize({width:320,height:740});
+ await page.getByRole('button',{name:/ツール一覧/}).click();
+ await category.selectOption('ファイル');
+ await page.locator('nav a[href="/tools/pdf-pages"]').waitFor();
+ assert.equal(await category.isVisible(),true);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ assert.ok(await page.locator('nav').evaluate(el=>el.getBoundingClientRect().height)>200);
+ await page.screenshot({path:'/tmp/toolbox-categories-mobile.png'});
+ await category.selectOption('all');
+ return 'PASS: compact category select, filtering + search, keyboard focus, state retention and 320px navigation';
+}
